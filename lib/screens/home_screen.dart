@@ -15,12 +15,15 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text("AI Assistant"),
-        leading: const Icon(Icons.menu, color: Colors.white,),
+        leading: const Icon(
+          Icons.menu,
+          color: Colors.white,
+        ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async{
+        onPressed: () async {
           if (await controller.speech.hasPermission &&
-          controller.speech.isNotListening) {
+              controller.speech.isNotListening) {
             await controller.startListening();
           } else if (controller.speech.isListening) {
             await controller.stopListening();
@@ -28,17 +31,21 @@ class HomeScreen extends StatelessWidget {
             controller.initialize();
           }
         },
-        shape: const CircleBorder(side: BorderSide(color: Colors.white, width: 2)),
+        shape:
+            const CircleBorder(side: BorderSide(color: Colors.white, width: 2)),
         backgroundColor: Theme.of(context).primaryColor,
-        child: Obx(()=>
-          Icon((controller.speechListening) ? Icons.stop : Icons.mic,
+        child: Obx(
+          () => Icon(
+            (controller.speechListening) ? Icons.stop : Icons.mic,
           ),
         ),
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            SizedBox(height: Get.height * 0.02,),
+            SizedBox(
+              height: Get.height * 0.02,
+            ),
             Stack(
               children: [
                 Center(
@@ -93,7 +100,8 @@ class HomeScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               alignment: Alignment.centerLeft,
-              margin: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 24.0),
+              margin:
+                  const EdgeInsets.symmetric(vertical: 10.0, horizontal: 24.0),
               child: const Text(
                 'Here are a few features',
                 style: TextStyle(
@@ -125,7 +133,7 @@ class HomeScreen extends StatelessWidget {
                       'Get the best of both worlds with a voice assistant powered by Dall-E and ChatGPT',
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),
