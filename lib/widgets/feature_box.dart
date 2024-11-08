@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../utils/app_colors.dart';
-
 class FeatureBox extends StatelessWidget {
-  final Color color;
   final String headerText;
   final String descriptionText;
   const FeatureBox({
     super.key,
-    required this.color,
     required this.headerText,
     required this.descriptionText,
   });
@@ -20,15 +16,25 @@ class FeatureBox extends StatelessWidget {
         horizontal: 30,
       ).copyWith(bottom: 20.0),
       decoration: BoxDecoration(
-        color: color,
-        borderRadius: const BorderRadius.all(
-          Radius.circular(15),
-        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.4),
+            blurRadius: 10,
+            offset: const Offset(-7, 7),
+          ),
+        ],
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.blue.shade300,
+            Colors.lightGreenAccent.shade100
+          ],
+        )
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20.0).copyWith(
-          left: 15,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 14.0, horizontal: 10.0),
         child: Column(
           children: [
             Align(
@@ -37,9 +43,10 @@ class FeatureBox extends StatelessWidget {
                 headerText,
                 style: const TextStyle(
                   fontFamily: 'Cera',
-                  color: AppColors.blackColor,
+                  color: Colors.white,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  fontStyle: FontStyle.italic
                 ),
               ),
             ),
@@ -50,7 +57,8 @@ class FeatureBox extends StatelessWidget {
                 descriptionText,
                 style: const TextStyle(
                   fontFamily: 'Cera',
-                  color: AppColors.blackColor,
+                  color: Colors.black54,
+                  fontStyle: FontStyle.italic
                 ),
               ),
             ),

@@ -13,8 +13,9 @@ class ChatRequestModel {
 class Contents {
   final String role;
   final List<Parts> parts;
+  final bool isImage;
 
-  Contents({required this.role, required this.parts});
+  Contents({required this.role, required this.parts, this.isImage = false,});
 
   Map<String, dynamic> toJson() {
     return {

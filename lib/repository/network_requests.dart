@@ -15,10 +15,10 @@ class NetworkRequests {
   final String _imageGeneratorKey =
       "vk-usJFHYb9BDbKjZA7TwddKys1Z33LrxfKZjAhNgAn7cnip";
 
-  Future<String> isArtPromptAPI(List<Contents> prompt) async {
+  Future<String> isArtPromptAPI(String prompt) async {
     try {
       final lastPrompt =
-          "Does this message want to generate an AI picture, image, art or anything similar? ${prompt.last.parts.first.text} . Simply answer with a yes or no.";
+          "Does this prompt want to generate or drawn an AI image, photo, art, picture, drawing or scenery something related?. then, simply answer with a YES or No. here is a prompt: $prompt.";
       final res = await http.post(
         Uri.parse("$_apiUrl$_geminiAIKey"),
         headers: {'Content-Type': 'application/json'},
@@ -32,10 +32,10 @@ class NetworkRequests {
             }
           ],
           'generationConfig': {
-            'temperature': 0.5,
+            'temperature': 0.1,
             'topK': 40,
-            'topP': 1.0,
-            'maxOutputTokens': 5026,
+            'topP': 1,
+            'maxOutputTokens': 2048,
             'responseMimeType': 'text/plain',
           },
         }),
@@ -43,8 +43,7 @@ class NetworkRequests {
 
       if (res.statusCode == 200) {
         final response = ChatResponseModel.fromJson(jsonDecode(res.body));
-        if (response.candidates!.first.content.parts.first.text
-            .contains("Yes")) {
+        if (response.candidates!.first.content.parts.first.text == "YES") {
           return "YES";
         } else {
           return "NO";
@@ -66,10 +65,10 @@ class NetworkRequests {
         body: jsonEncode({
           'contents': messages.map((e) => e.toJson()).toList(),
           'generationConfig': {
-            'temperature': 0.5,
+            'temperature': 0.1,
             'topK': 40,
-            'topP': 1.0,
-            'maxOutputTokens': 5026,
+            'topP': 1,
+            'maxOutputTokens': 2048,
             'responseMimeType': 'text/plain',
           },
         }),
@@ -87,16 +86,16 @@ class NetworkRequests {
     }
   }
 
-  Future<String> geminiImagenAPI(String prompt) async {
+  Future<String> imagineAPI(String prompt) async {
     final url = Uri.parse('https://api.vyro.ai/v1/imagine/api/generations');
 
     try {
       final fields = {
         'prompt': prompt,
-        'style_id': '29',
+        'style_id': '122',
         'aspect_ratio': "3:4",
         'high_res_results': '1',
-        'cfg_scale': '7',
+        'cfg': '7',
         'samples': '1',
         // Add more parameters as needed for safety and quality
       };
@@ -113,7 +112,12 @@ class NetworkRequests {
         final tempFile = File('${tempDir.path}/image.png');
         await tempFile.writeAsBytes(imageBytes);
         return tempFile.path;
-      } else {
+      } else if(response.statusCode == 500){
+        return "Internal Server Error: Retry the request or contact support";
+      } else if(response.statusCode == 503){
+        return "Service Unavailable Error: The service is currently unavailable. Retry the request later";
+      }
+      else {
         return 'Error: Failed to generate image';
       }
     } catch (e) {
