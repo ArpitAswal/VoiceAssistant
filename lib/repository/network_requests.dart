@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
+import '../exceptions/app_exception.dart';
 import '../models/chat_model.dart';
 import '../models/chat_response_model.dart';
 
@@ -10,15 +12,12 @@ class NetworkRequests {
   final List<Map<String, String>> messages = [];
 
   final String _geminiAIKey = "AIzaSyBYplFVmDHsQo9UiXvV10jyL5hluvDtgwI";
-  final String _apiUrl =
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=';
-  final String _imageGeneratorKey =
-      "vk-usJFHYb9BDbKjZA7TwddKys1Z33LrxfKZjAhNgAn7cnip";
+  final String _apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=';
+  final String _imageGeneratorKey = "vk-usJFHYb9BDbKjZA7TwddKys1Z33LrxfKZjAhNgAn7cnip";
 
   Future<String> isArtPromptAPI(String prompt) async {
     try {
-      final lastPrompt =
-          "Does this prompt want to generate or drawn an AI image, photo, art, picture, drawing or scenery something related?. then, simply answer with a YES or No. here is a prompt: $prompt.";
+      final lastPrompt = "Does this prompt want to generate or drawn an AI image, photo, art, picture, drawing or scenery something related?. then, simply answer with a YES or No. here is a prompt: $prompt.";
       final res = await http.post(
         Uri.parse("$_apiUrl$_geminiAIKey"),
         headers: {'Content-Type': 'application/json'},
@@ -50,15 +49,26 @@ class NetworkRequests {
         }
       }
       return 'An internal error occurred';
-    } catch (e) {
-      return e.toString();
+    } on SocketException {
+      throw AppException(
+          message: 'No Internet connection', type: ExceptionType.internet);
+    } on HttpException {
+      throw AppException(
+          message: "Couldn't find the data", type: ExceptionType.http);
+    } on FormatException {
+      throw AppException(
+          message: "Bad response format", type: ExceptionType.format);
+    } on TimeoutException catch (_) {
+      throw AppException(
+        message: 'Connection timed out',
+        type: ExceptionType.timeout,
+      );
     }
   }
 
   Future<ChatResponseModel?> geminiAPI(
       {required List<Contents> messages}) async {
     try {
-      // Build the payload
       final res = await http.post(
         Uri.parse("$_apiUrl$_geminiAIKey"),
         headers: {'Content-Type': 'application/json'},
@@ -74,15 +84,26 @@ class NetworkRequests {
         }),
       );
 
-      // Check if the request was successful
       if (res.statusCode == 200) {
         final responseData = jsonDecode(res.body);
         return ChatResponseModel.fromJson(responseData);
       } else {
         return null;
       }
-    } catch (e) {
-      return null;
+    } on SocketException {
+      throw AppException(
+          message: 'No Internet connection', type: ExceptionType.internet);
+    } on HttpException {
+      throw AppException(
+          message: "Couldn't find the data", type: ExceptionType.http);
+    } on FormatException {
+      throw AppException(
+          message: "Bad response format", type: ExceptionType.format);
+    } on TimeoutException catch (_) {
+      throw AppException(
+        message: 'Connection timed out',
+        type: ExceptionType.timeout,
+      );
     }
   }
 
@@ -103,8 +124,7 @@ class NetworkRequests {
       multipartRequest.headers['Authorization'] = 'Bearer $_imageGeneratorKey';
       multipartRequest.fields.addAll(fields);
 
-      http.Response response =
-          await http.Response.fromStream(await multipartRequest.send());
+      http.Response response = await http.Response.fromStream(await multipartRequest.send());
 
       if (response.statusCode == 200) {
         final imageBytes = response.bodyBytes;
@@ -112,16 +132,33 @@ class NetworkRequests {
         final tempFile = File('${tempDir.path}/image.png');
         await tempFile.writeAsBytes(imageBytes);
         return tempFile.path;
-      } else if(response.statusCode == 500){
-        return "Internal Server Error: Retry the request or contact support";
-      } else if(response.statusCode == 503){
-        return "Service Unavailable Error: The service is currently unavailable. Retry the request later";
+      } else if (response.statusCode == 500) {
+        throw AppException(
+            message: 'Internal Server Error: Retry the request or contact support',
+            type: ExceptionType.api);
+      } else if (response.statusCode == 503) {
+        throw AppException(
+            message: 'Service Unavailable: The service is currently unavailable. Retry the request later',
+            type: ExceptionType.api);
+      } else {
+        throw AppException(
+            message: 'Exception Occur: Failed to generate an image',
+            type: ExceptionType.api);
       }
-      else {
-        return 'Error: Failed to generate image';
-      }
-    } catch (e) {
-      return "Error: $e";
+    } on SocketException {
+      throw AppException(
+          message: 'No Internet connection', type: ExceptionType.internet);
+    } on HttpException {
+      throw AppException(
+          message: "Couldn't find the data", type: ExceptionType.http);
+    } on FormatException {
+      throw AppException(
+          message: "Bad response format", type: ExceptionType.format);
+    } on TimeoutException catch (_) {
+      throw AppException(
+        message: 'Connection timed out',
+        type: ExceptionType.timeout,
+      );
     }
   }
 }

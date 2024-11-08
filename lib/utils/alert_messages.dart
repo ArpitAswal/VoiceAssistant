@@ -3,10 +3,9 @@ import 'package:get/get.dart';
 import 'package:voice_assistant/controllers/home_controller.dart';
 
 class AlertMessages {
-
   static Widget bottomSheet({required String msg}) {
     return Card(
-      elevation: 5,
+      elevation: 8,
       shadowColor: Colors.grey[400],
       color: Colors.white,
       margin: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
@@ -31,10 +30,12 @@ class AlertMessages {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("Audio Record Permission",
+                    const Text(
+                      "Audio Record Permission",
                       style: TextStyle(
                           fontSize: 16,
-                          color: Colors.black, fontWeight: FontWeight.w600),
+                          color: Colors.black,
+                          fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 2.0),
                     Text(
@@ -44,7 +45,8 @@ class AlertMessages {
                       style: const TextStyle(
                           fontSize: 12,
                           fontFamily: "Cera",
-                          color: Colors.black54, fontWeight: FontWeight.w400),
+                          color: Colors.black54,
+                          fontWeight: FontWeight.w400),
                     )
                   ],
                 ),
@@ -75,37 +77,35 @@ class AlertMessages {
     );
   }
 
-  static void showSnackBar(String message, {int? duration}){
+  static void showSnackBar(String message, {int? duration}) {
     Get.showSnackbar(GetSnackBar(
-      message: message,
-      duration: Duration(
-        seconds: duration ?? 5,
-      ),
-      backgroundGradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          Colors.blue.shade300,
-          Colors.lightGreenAccent.shade100
-        ],
-      ),
-      boxShadows: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.4),
-          blurRadius: 10,
-          offset: const Offset(-7, 7),
+        message: message,
+        duration: Duration(
+          seconds: duration ?? 5,
         ),
-      ],
-      snackPosition: SnackPosition.BOTTOM,
-      borderRadius: 20,
-      margin: const EdgeInsets.all(12),
-      isDismissible: true,
-      dismissDirection: DismissDirection.horizontal,
-      forwardAnimationCurve: Curves.easeOutBack,
-      icon: const Icon(Icons.error,color: Colors.white,),
+        backgroundGradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Colors.blue.shade300, Colors.lightGreenAccent.shade100],
+        ),
+        boxShadows: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.4),
+            blurRadius: 10,
+            offset: const Offset(0, 6),
+          ),
+        ],
+        snackPosition: SnackPosition.BOTTOM,
+        borderRadius: 20,
+        margin: const EdgeInsets.all(12),
+        isDismissible: true,
+        dismissDirection: DismissDirection.horizontal,
+        forwardAnimationCurve: Curves.easeOutBack,
+        icon: const Icon(
+          Icons.error,
+          color: Colors.white,
+        ),
         borderColor: Colors.white,
-        borderWidth: 2
-    ));
+        borderWidth: 2));
   }
 }
-
