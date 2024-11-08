@@ -6,7 +6,7 @@ class AlertMessages {
 
   static Widget bottomSheet({required String msg}) {
     return Card(
-      elevation: 5,
+      elevation: 8,
       shadowColor: Colors.grey[400],
       color: Colors.white,
       margin: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
@@ -93,7 +93,7 @@ class AlertMessages {
         BoxShadow(
           color: Colors.black.withOpacity(0.4),
           blurRadius: 10,
-          offset: const Offset(-7, 7),
+          offset: const Offset(0, 6),
         ),
       ],
       snackPosition: SnackPosition.BOTTOM,

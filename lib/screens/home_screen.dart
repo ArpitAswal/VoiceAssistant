@@ -41,8 +41,8 @@ class HomeScreen extends StatelessWidget {
       floatingActionButton: Align(
         alignment: Alignment.bottomRight,
         child: ZoomIn(
-          delay: const Duration(milliseconds: 800),
-          duration: const Duration(milliseconds: 1000),
+          delay: const Duration(milliseconds: 600),
+          duration: const Duration(milliseconds: 600),
           child: Obx(() => (controller.textResponse.value == false)
               ? Padding(
                 padding: const EdgeInsets.only(bottom: 8.0, right: 16.0),
@@ -143,7 +143,7 @@ class HomeScreen extends StatelessWidget {
               height: Get.height * 0.02,
             ),
             ZoomIn(
-              duration: const Duration(milliseconds: 1000),
+              duration: const Duration(milliseconds: 600),
               child: Stack(
                 children: [
                   Center(
@@ -180,9 +180,10 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             FadeIn(
-              duration: const Duration(milliseconds: 1000),
+              duration: const Duration(milliseconds: 600),
               child: Obx(
                 () => Container(
+                  width: Get.width,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12, vertical: 10),
                   margin: const EdgeInsets.symmetric(horizontal: 30,vertical: 20),
@@ -215,7 +216,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ) :
                   Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: controller.messages.map((msg) {
                         if (msg.isImage) {
                           return Padding(
@@ -235,12 +236,12 @@ class HomeScreen extends StatelessWidget {
                                 animatedTexts: [
                                   TyperAnimatedText(
                                       (msg.role == "user") ? "Q. ${msg.parts.first.text}" :
-                                      msg.parts.first.text,
+                                       msg.parts.first.text,
                                       textStyle: TextStyle(
                                           fontFamily: 'Cera',
-                                          color: (msg.role == "model") ? Colors.grey : Colors.black87,
+                                          color: (msg.role == "user") ? Colors.black87 : (msg.parts.first.text == "Failed") ? Colors.red : Colors.grey,
                                           fontSize: 16),
-                                      textAlign: TextAlign.start),
+                                      textAlign: (msg.role == "model" && msg.parts.first.text == "Failed") ? TextAlign.end : TextAlign.start),
                                 ],
                                 isRepeatingAnimation: false,
                               ),
@@ -263,8 +264,8 @@ class HomeScreen extends StatelessWidget {
               Visibility(
                 visible: !controller.textResponse.value,
                 child: SlideInLeft(
-                  delay: const Duration(milliseconds: 200),
-                  duration: const Duration(milliseconds: 1000),
+                  delay: const Duration(milliseconds: 100),
+                  duration: const Duration(milliseconds: 600),
                   child: Container(
                       padding: const EdgeInsets.all(10),
                       alignment: Alignment.centerLeft,
@@ -288,7 +289,7 @@ class HomeScreen extends StatelessWidget {
                 child: Column(children: [
                       SlideInRight(
                         delay: const Duration(milliseconds: 200),
-                        duration: const Duration(milliseconds: 1000),
+                        duration: const Duration(milliseconds: 600),
                         child: const FeatureBox(
                           headerText: 'Gemini',
                           descriptionText:
@@ -297,7 +298,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                       SlideInLeft(
                         delay: const Duration(milliseconds: 400),
-                        duration: const Duration(milliseconds: 1000),
+                        duration: const Duration(milliseconds: 600),
                         child: const FeatureBox(
                           headerText: 'Imagine AI',
                           descriptionText:
@@ -306,7 +307,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                       SlideInRight(
                         delay: const Duration(milliseconds: 600),
-                        duration: const Duration(milliseconds: 1000),
+                        duration: const Duration(milliseconds: 600),
                         child: const FeatureBox(
                           headerText: 'Smart Voice Assistant',
                           descriptionText:

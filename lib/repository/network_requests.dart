@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
+import '../exceptions/app_exception.dart';
 import '../models/chat_model.dart';
 import '../models/chat_response_model.dart';
 
@@ -50,8 +52,20 @@ class NetworkRequests {
         }
       }
       return 'An internal error occurred';
-    } catch (e) {
-      return e.toString();
+    } on SocketException {
+      throw AppException(
+          message: 'No Internet connection', type: ExceptionType.internet);
+    } on HttpException {
+      throw AppException(
+          message: "Couldn't find the data", type: ExceptionType.http);
+    } on FormatException {
+      throw AppException(
+          message: "Bad response format", type: ExceptionType.format);
+    } on TimeoutException catch (_) {
+      throw AppException(
+        message: 'Connection timed out',
+        type: ExceptionType.timeout,
+      );
     }
   }
 
@@ -81,8 +95,20 @@ class NetworkRequests {
       } else {
         return null;
       }
-    } catch (e) {
-      return null;
+    } on SocketException {
+      throw AppException(
+          message: 'No Internet connection', type: ExceptionType.internet);
+    } on HttpException {
+      throw AppException(
+          message: "Couldn't find the data", type: ExceptionType.http);
+    } on FormatException {
+      throw AppException(
+          message: "Bad response format", type: ExceptionType.format);
+    } on TimeoutException catch (_) {
+      throw AppException(
+        message: 'Connection timed out',
+        type: ExceptionType.timeout,
+      );
     }
   }
 
@@ -120,8 +146,20 @@ class NetworkRequests {
       else {
         return 'Error: Failed to generate image';
       }
-    } catch (e) {
-      return "Error: $e";
+    } on SocketException {
+      throw AppException(
+          message: 'No Internet connection', type: ExceptionType.internet);
+    } on HttpException {
+      throw AppException(
+          message: "Couldn't find the data", type: ExceptionType.http);
+    } on FormatException {
+      throw AppException(
+          message: "Bad response format", type: ExceptionType.format);
+    } on TimeoutException catch (_) {
+      throw AppException(
+        message: 'Connection timed out',
+        type: ExceptionType.timeout,
+      );
     }
   }
 }

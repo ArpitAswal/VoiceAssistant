@@ -5,6 +5,7 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:voice_assistant/repository/network_requests.dart';
 import 'package:voice_assistant/utils/alert_messages.dart';
 
+import '../exceptions/app_exception.dart';
 import '../models/chat_model.dart';
 
 class HomeController extends GetxController {
@@ -18,7 +19,7 @@ class HomeController extends GetxController {
   final RxBool speechListen = false.obs;
   final RxBool textResponse = false.obs;
   final RxBool isLoading = false.obs;
-  final RxBool isStopped = false.obs; // Flag to check if the TTS should stop
+  final RxBool isStopped = true.obs; // Flag to check if the TTS should stop
   final RxList<Contents> messages = <Contents>[].obs;
 
   List<String> messageQueue = [];
@@ -45,34 +46,61 @@ class HomeController extends GetxController {
   }
 
   Future<void> callGeminiAPI() async {
-    final data = await _service.geminiAPI(messages: messages);
-    if (data != null && data.candidates != null) {
-      final botResponse = data.candidates!.first.content.parts.first.text;
-      messages.add(Contents(role: "model", parts: [Parts(text: botResponse)], isImage: false));
-      speakTTs(botResponse);
-    } else {
-      messages.add(Contents(role: "model", parts: [Parts(text: "Sorry, I am not able to gives you a response of your prompt")], isImage: false));
-      speakTTs("Sorry, I am not able to gives you a response of your prompt");
+    try {
+      final data = await _service.geminiAPI(messages: messages);
+      if (data != null && data.candidates != null) {
+        final botResponse = data.candidates!.first.content.parts.first.text;
+        messages.add(Contents(
+            role: "model", parts: [Parts(text: botResponse)], isImage: false));
+        speakTTs(botResponse);
+      } else {
+        messages.add(Contents(role: "model",
+            parts: [
+              Parts(
+                  text: "Sorry, I am not able to gives you a response of your prompt")
+            ],
+            isImage: false));
+        speakTTs("Sorry, I am not able to gives you a response of your prompt");
+      }
+    } on AppException catch (e) {
+      AlertMessages.showSnackBar(e.message.toString());
+    } catch (e) {
+      AlertMessages.showSnackBar(e.toString());
+    } finally{
+      isLoading.value = false;
     }
-    isLoading.value = false;
   }
 
   Future<void> callImagineAPI(String input) async {
-    final data = await _service.imagineAPI(input);
-    if (!data.contains("Error")) {
-      messages.add(Contents(role: "user", parts: [
-        Parts(text: "Here, is a comprehensive desire image output of your prompt"),
-      ], isImage: false));
-      messages.add(Contents(role: "model", parts: [
-        Parts(text: data)
-      ], isImage: true));
-    } else {
-      messages.add(Contents(role: "model", parts: [
-        Parts(text: data),
-      ], isImage: false));
-      speakTTs(data);
+    try {
+      final data = await _service.imagineAPI(input);
+      if (!data.contains("Error")) {
+        messages.add(Contents(role: "user", parts: [
+          Parts(
+              text: "Here, is a comprehensive desire image output of your prompt"),
+        ], isImage: false));
+        messages.add(Contents(role: "model", parts: [
+          Parts(text: data)
+        ], isImage: true));
+      } else {
+        messages.add(Contents(role: "model", parts: [
+          Parts(text: data),
+        ], isImage: false));
+        speakTTs(data);
+      }
+    } on AppException catch (e) {
+      messages.add(Contents(role: "model",
+          parts: [Parts(text: "Failed")],
+          isImage: false));
+      AlertMessages.showSnackBar(e.message.toString());
+    } catch (e) {
+      messages.add(Contents(role: "model",
+          parts: [Parts(text: "Failed")],
+          isImage: false));
+      AlertMessages.showSnackBar(e.toString());
+    } finally{
+      isLoading.value = false;
     }
-    isLoading.value = false;
   }
 
   Future<void> audioPermission(String error) async{
@@ -146,30 +174,57 @@ class HomeController extends GetxController {
 
   // Method to send the input text to ChatGPT API and receive a response
   Future<void> _sendRequest(String input) async {
-    textResponse.value = true;
-    if(input.isNotEmpty){
-      messages.add(Contents(role: "user", parts: [Parts(text: input)], isImage: false));
-      isLoading.value = true;
-    final response = await _service.isArtPromptAPI(input);
-    if(input.contains("draw") || input.contains("image") || input.contains("picture")){
-        await callImagineAPI(input);
-    } else if(response == "NO"){
-        await callGeminiAPI();
+    try {
+      textResponse.value = true;
+      if (input.isNotEmpty) {
+        messages.add(Contents(
+            role: "user", parts: [Parts(text: input)], isImage: false));
+        isLoading.value = true;
+        final response = await _service.isArtPromptAPI(input);
+        if (input.contains("draw") || input.contains("image") ||
+            input.contains("picture")) {
+          await callImagineAPI(input);
+        } else if (response == "NO") {
+          await callGeminiAPI();
+        }
+        else if (response == "YES") {
+          await callImagineAPI(input);
+        } else {
+          // Speak out the response
+          isLoading.value = false;
+          messages.add(Contents(
+              role: "model", parts: [Parts(text: response)], isImage: false));
+          speakTTs(response);
+        }
       }
-     else if(response == "YES") {
-      await callImagineAPI(input);
-    } else {
-      // Speak out the response
+      else {
+        messages.add(Contents(role: "user",
+            parts: [
+              Parts(
+                  text: "Please provide me with some context or a question so I can assist you.")
+            ],
+            isImage: false));
+        messageQueue.add(
+            "Please provide me with some context or a question so I can assist you.");
+        messages.add(Contents(role: "model",
+            parts: [Parts(text: "For example: Give me some Interview Tips.")],
+            isImage: false));
+        messageQueue.add("For example: Give me some Interview Tips.");
+        isStopped.value = false;
+        await _speakNextMessage();
+      }
+    } on AppException catch (e) {
       isLoading.value = false;
-      messages.add(Contents(role: "model", parts: [Parts(text: response)], isImage: false));
-      speakTTs(response);
-    } }
-    else{
-      messages.add(Contents(role: "user", parts: [Parts(text: "Please provide me with some context or a question so I can assist you.")], isImage: false));
-      messageQueue.add("Please provide me with some context or a question so I can assist you.");
-      messages.add(Contents(role: "model", parts: [Parts(text: "For example: Give me some Interview Tips.")], isImage: false));
-      messageQueue.add("For example: Give me some Interview Tips.");
-      await _speakNextMessage();
+      messages.add(Contents(role: "model",
+          parts: [Parts(text: "Failed")],
+          isImage: false));
+      AlertMessages.showSnackBar(e.message.toString());
+    } catch (e) {
+      isLoading.value = false;
+      messages.add(Contents(role: "model",
+          parts: [Parts(text: "Failed")],
+          isImage: false));
+      AlertMessages.showSnackBar(e.toString());
     }
   }
 
